@@ -1,26 +1,67 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-primary: #004f51;
+  --color-secondary: #f7e4c3;
+  --color-neutral-dark: #1c1c1c;
+  --color-neutral-light: #fafafa;
+  --color-positive: #2f7e80;
+  --color-negative: #e04848;
+
+  --color-background: #fafafa;
+  --color-foreground: #1c1c1c;
+  --color-card: #f7e4c3;
+  --color-card-foreground: #1c1c1c;
+  --color-popover: #fafafa;
+  --color-popover-foreground: #1c1c1c;
+  --color-primary-foreground: #fafafa;
+  --color-secondary-foreground: #1c1c1c;
+  --color-muted: #f7e4c3;
+  --color-muted-foreground: #646464;
+  --color-accent: #f7e4c3;
+  --color-accent-foreground: #1c1c1c;
+  --color-destructive: #e04848;
+  --color-destructive-foreground: #fafafa;
+  --color-border: #c8c8c8;
+  --color-input: #c8c8c8;
+  --color-ring: #004f51;
+
+  --radius: 0.5rem;
+
+  --color-chart-1: #004f51;
+  --color-chart-2: #2f7e80;
+  --color-chart-3: #e04848;
+  --color-chart-4: #f7e4c3;
+  --color-chart-5: #646464;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-background: #1c1c1c;
+    --color-foreground: #fafafa;
+    --color-card: #282828;
+    --color-card-foreground: #fafafa;
+    --color-popover: #1c1c1c;
+    --color-popover-foreground: #fafafa;
+    --color-primary-foreground: #fafafa;
+    --color-secondary-foreground: #fafafa;
+    --color-muted: #282828;
+    --color-muted-foreground: #969696;
+    --color-accent: #282828;
+    --color-accent-foreground: #fafafa;
+    --color-destructive: #e04848;
+    --color-destructive-foreground: #fafafa;
+    --color-border: #3c3c3c;
+    --color-input: #3c3c3c;
+    --color-ring: #004f51;
+  }
 }
