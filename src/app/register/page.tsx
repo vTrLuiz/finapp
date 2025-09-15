@@ -48,14 +48,49 @@ export default function RegisterPage() {
       return;
     }
 
-    // Simulação de registro (substitua por API real)
-    setTimeout(() => {
+    try {
+      // Chamar a API de registro
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao criar conta");
+      }
+
       setSuccess("Conta criada com sucesso! Redirecionando...");
+
+      // Salvar dados do usuário no localStorage
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.name,
+          loggedIn: true,
+        })
+      );
+
       setTimeout(() => {
-        router.push("/login");
+        router.push("/dashboard");
       }, 2000);
-    }, 1000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro desconhecido");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutralLight to-secondary flex items-center justify-center">
       <div className="bg-secondary p-8 rounded-lg shadow-xl w-full max-w-md">
@@ -146,7 +181,7 @@ export default function RegisterPage() {
               name="confirmPassword"
               required
               className="w-full px-3 py-2 border border-neutralDark/20 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-neutralLight text-neutralDark"
-              placeholder="Digite a senha novamente"
+              placeholder="Confirme sua senha"
             />
           </div>
 
@@ -158,28 +193,25 @@ export default function RegisterPage() {
               required
               className="h-4 w-4 text-primary focus:ring-primary border-neutralDark/20 rounded"
             />
-            <label htmlFor="terms" className="ml-2 text-sm text-neutralDark/70">
-              Aceito os{" "}
-              <button
-                type="button"
-                className="text-primary hover:text-primary/80 underline"
-              >
+            <label
+              htmlFor="terms"
+              className="ml-2 block text-sm text-neutralDark/70"
+            >
+              Eu aceito os{" "}
+              <Link href="/terms" className="text-primary hover:underline">
                 termos de uso
-              </button>{" "}
+              </Link>{" "}
               e{" "}
-              <button
-                type="button"
-                className="text-primary hover:text-primary/80 underline"
-              >
+              <Link href="/privacy" className="text-primary hover:underline">
                 política de privacidade
-              </button>
+              </Link>
             </label>
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-neutralLight font-semibold py-3 px-4 rounded-lg transition-colors"
+            className="w-full bg-primary text-white py-2 px-4 rounded-lg hover:bg-primary/90 focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? "Criando conta..." : "Criar conta"}
           </button>
@@ -190,20 +222,11 @@ export default function RegisterPage() {
             Já tem uma conta?{" "}
             <Link
               href="/login"
-              className="text-primary hover:text-primary/80 font-semibold"
+              className="text-primary hover:underline font-medium"
             >
-              Fazer login
+              Faça login
             </Link>
           </p>
-        </div>
-
-        <div className="mt-6 text-center">
-          <Link
-            href="/"
-            className="text-neutralDark/50 hover:text-neutralDark/70"
-          >
-            ← Voltar para o início
-          </Link>
         </div>
       </div>
     </div>

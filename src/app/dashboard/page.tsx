@@ -3,13 +3,23 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useDashboard } from "@/hooks/useDashboard";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<{ email: string; loggedIn: boolean } | null>(
-    null
-  );
+  const [user, setUser] = useState<{
+    email: string;
+    loggedIn: boolean;
+    id: string;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const {
+    summary,
+    transactions,
+    loading: dataLoading,
+    error,
+  } = useDashboard(user?.id || "");
 
   useEffect(() => {
     // Verificar se usuário está logado
@@ -40,6 +50,7 @@ export default function DashboardPage() {
   if (!user) {
     return null; // Será redirecionado pelo useEffect
   }
+
   return (
     <div className="min-h-screen bg-neutralLight">
       {/* Header com navegação */}
@@ -78,26 +89,59 @@ export default function DashboardPage() {
           <p className="text-neutralDark/70">Visão geral das suas finanças</p>
         </div>
 
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            Erro ao carregar dados: {error}
+          </div>
+        )}
+
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <div className="bg-secondary p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-neutralDark mb-2">
               Saldo Atual
             </h3>
-            <p className="text-3xl font-bold text-positive">R$ 2.450,00</p>
+            {dataLoading ? (
+              <div className="text-neutralDark/70">Carregando...</div>
+            ) : (
+              <p className="text-3xl font-bold text-positive">
+                R${" "}
+                {summary?.totalBalance.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                }) || "0,00"}
+              </p>
+            )}
           </div>
 
           <div className="bg-secondary p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-neutralDark mb-2">
               Receitas do Mês
             </h3>
-            <p className="text-3xl font-bold text-positive">R$ 5.200,00</p>
+            {dataLoading ? (
+              <div className="text-neutralDark/70">Carregando...</div>
+            ) : (
+              <p className="text-3xl font-bold text-positive">
+                R${" "}
+                {summary?.monthlyIncome.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                }) || "0,00"}
+              </p>
+            )}
           </div>
 
           <div className="bg-secondary p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-neutralDark mb-2">
               Gastos do Mês
             </h3>
-            <p className="text-3xl font-bold text-negative">R$ 2.750,00</p>
+            {dataLoading ? (
+              <div className="text-neutralDark/70">Carregando...</div>
+            ) : (
+              <p className="text-3xl font-bold text-negative">
+                R${" "}
+                {summary?.monthlyExpenses.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                }) || "0,00"}
+              </p>
+            )}
           </div>
         </div>
 
@@ -107,20 +151,41 @@ export default function DashboardPage() {
               Transações Recentes
             </h3>
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-neutralDark/70">Supermercado</span>
-                <span className="text-negative font-semibold">-R$ 150,00</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-neutralDark/70">Salário</span>
-                <span className="text-positive font-semibold">
-                  +R$ 3.500,00
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-neutralDark/70">Conta de Luz</span>
-                <span className="text-negative font-semibold">-R$ 89,50</span>
-              </div>
+              {dataLoading ? (
+                <div className="text-neutralDark/70">Carregando...</div>
+              ) : transactions.length === 0 ? (
+                <div className="text-neutralDark/70">
+                  Nenhuma transação encontrada
+                </div>
+              ) : (
+                transactions.slice(0, 5).map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    className="flex justify-between items-center"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-neutralDark/70">
+                        {transaction.description || "Sem descrição"}
+                      </span>
+                      <span className="text-xs text-neutralDark/50">
+                        {transaction.account.name}
+                      </span>
+                    </div>
+                    <span
+                      className={`font-semibold ${
+                        transaction.type === "income"
+                          ? "text-positive"
+                          : "text-negative"
+                      }`}
+                    >
+                      {transaction.type === "income" ? "+" : "-"}R${" "}
+                      {Number(transaction.amount).toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
